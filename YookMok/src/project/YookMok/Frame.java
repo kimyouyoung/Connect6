@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,6 +36,7 @@ public class Frame extends JFrame{
 	int count = 0;
 	int p_count = 0;
 	int co = 1;
+	int b_count = 0;
 	
 	int gu_x, gu_y, g_width, g_height;
 	int su_x, su_y, s_width, s_height;
@@ -54,11 +56,14 @@ public class Frame extends JFrame{
 	
 	String str = "";
 	String str2 = "";
+	String com = "";
 	
 	int m_1 = 0;
 	int m_2 = 0;
 	
-	boolean checkBlack = true;
+	boolean brain = false;
+	boolean first = true;
+	boolean second = true;
 	
 	BufferedImage player_1;
 	BufferedImage player_2;
@@ -71,6 +76,7 @@ public class Frame extends JFrame{
 	ArrayList<Yook> yook = new ArrayList<Yook>();
 	
 	int[][] map = new int[19][19];
+	int[][] b_map = new int[19][19];
 	
 	public Frame() {
 		
@@ -129,6 +135,7 @@ public class Frame extends JFrame{
 		cb.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
+				co = -1;
 				player = 1;
 				black = 1;
 				cb2.setState(false);
@@ -168,9 +175,11 @@ public class Frame extends JFrame{
 		cb2.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
+				co = -1;
 				player = -1;
 				black = 2;
 				cb.setState(false);
+				b_map[9][9] = -1;
 			}
 		});
 		
@@ -233,9 +242,9 @@ public class Frame extends JFrame{
 		ex_panel.add(label3);
 		
 		ex_panel.setLayout(null);
-		JButton btn = new JButton("게임시작");
+		JButton btn = new JButton("같이놀기");
 		btn.setFont(new Font("Britannic", Font.PLAIN, 40));
-		btn.setBounds(200, 500, 200, 100);
+		btn.setBounds(50, 500, 200, 100);
 		btn.setHorizontalAlignment(JButton.CENTER);
 		btn.addActionListener(new ActionListener() {
 
@@ -253,27 +262,101 @@ public class Frame extends JFrame{
 		});
 		ex_panel.add(btn);
 		
+		JButton btn2 = new JButton("혼자놀기");
+		btn2.setFont(new Font("Britannic", Font.PLAIN, 40));
+		btn2.setBounds(350, 500, 200, 100);
+		btn2.setHorizontalAlignment(JButton.CENTER);
+		btn2.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				brain = true;
+				getContentPane().removeAll();
+				getContentPane().add(ChooseCharacter());
+				revalidate();
+				repaint();
+			}
+			
+		});
+		ex_panel.add(btn2);
+		
 		return ex_panel;
 	}
 	
+	public JPanel ChooseCharacter() {
+		JPanel c_panel = new JPanel();
+		c_panel.setBounds(0, 0, this.getWidth(), this.getHeight());
+		c_panel.setBackground(Color.WHITE);
+		c_panel.setLayout(null);
+		
+		BufferedImage p1, p2;
+		try {
+			p1 = ImageIO.read(new File("/Users/youyoungkim/Downloads/player_1.png"));
+			p2 = ImageIO.read(new File("/Users/youyoungkim/Downloads/player_2.png"));
+			
+			ImageIcon pp1 = new ImageIcon(p1);
+			JButton btn = new JButton(pp1);
+			btn.setBounds(200, 230, 200, 470);
+			btn.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					com = "JA";
+					getContentPane().removeAll();
+					getContentPane().add(panel);
+					getContentPane().add(panel_1);
+					getContentPane().add(panel_2);
+					getContentPane().add(panel_3);
+					revalidate();
+					repaint();
+				}
+				
+			});
+			
+			ImageIcon pp2 = new ImageIcon(p2);
+			JButton btn2 = new JButton(pp2);
+			btn2.setBounds(700, 230, 200, 470);
+			btn2.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					com = "CH";
+					getContentPane().removeAll();
+					getContentPane().add(panel);
+					getContentPane().add(panel_1);
+					getContentPane().add(panel_2);
+					getContentPane().add(panel_3);
+					revalidate();
+					repaint();
+				}
+				
+			});
+			
+			c_panel.add(btn);
+			c_panel.add(btn2);
+			
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		return c_panel;
+	}
+	
 	public void restart() {
-		yook.clear();
-		player = 0;
-		start_n = 0;
-		cb.setState(false);
-		cb2.setState(false);
+		yook.clear(); player = 0; start_n = 0;
+		cb.setState(false); cb2.setState(false);
 		map = new int[19][19];
 		black = 0;
-		murugi_1 = 0;
-		murugi_2 = 0;
-		m_1 = 0;
-		m_2 = 0;
-		count = 0;
-		p_count = 0;
-		co = 1;
-		re = 1;
-		str = "";
-		str2 = "";
+		murugi_1 = 0; murugi_2 = 0;
+		m_1 = 0; m_2 = 0;
+		count = 0; p_count = 0;
+		co = 1; re = 1;
+		str = ""; str2 = "";
+		first = true;
+		second = true;
+		b_map = new int[19][19];
+		b_map[9][9] = -1;
+		b_count = 0;
 		repaint();
 	}
 
@@ -313,11 +396,14 @@ public class Frame extends JFrame{
 				}
 			}
 			
+			
 			if(start_n == 1) {
 				Yook s = new Yook(new Ellipse2D.Double(9*30+6, 9*30+6, 20, 20), 1, 9, 9);
 				yook.add(s);
 				map[9][9] = 1;
 				co = -1;
+				if(brain && (com.equals("CH") && player == 1) || (com.equals("JA") && player == -1))
+					callBrain();
 			}
 			
 			for(Yook yo : yook) {
@@ -332,40 +418,1057 @@ public class Frame extends JFrame{
 		}
 	}
 	
+	public void callBrain() {
+		// Computer turn
+		if((com.equals("CH") && player == 1) || (com.equals("JA") && player == -1)) {
+			for(int i = 0; i < 2; i++) {
+				if(count == 2) {
+					co *= -1;
+					count = 0;
+					p_count = 0;
+				}
+								
+				if(p_count == 1) {
+					player *= -1;
+				}
+				brain();
+				repaint();
+				Row();	
+				Column();
+				Diagonal_Line();
+				Diagonal_Line2();
+				All();			
+			}
+		}
+		return;
+	}
+	
+	
+	
+	public void brain() {
+		
+		int min = 0, min_i = 0, min_j = 0;
+		int max = 0, max_i = 0, max_j = 0;
+		int final_i = 0, final_j = 0;
+		int com_x, com_y;
+		if(first || second) {
+			for(int i = 0; i < 19; i++) {
+				for(int j = 0; j < 19; j++) {
+					com_x = (int)(Math.random()*3)+8;
+					com_y = (int)(Math.random()*3)+8;
+					if(map[com_x][com_y] == 0) {
+							map[com_x][com_y] = co;
+							
+							for(int k = -1; k < 2; k++) {
+								if(com_x-1>=0 && com_y+k <19 && com_y+k >=0)
+									b_map[com_x-1][com_y+k] += 1;
+								
+							}for(int k = -1; k < 2; k++) {
+								if(k == 0)
+									continue;
+								if(com_x>=0 && com_y+k <19 && com_y+k >=0)
+									b_map[com_x][com_y+k] += 1;
+							}
+							for(int k = -1; k < 2; k++) { 
+								if(com_y+k <19 && com_y+k >=0)
+									b_map[com_x+1][com_y+k] += 1;
+							}
+							
+							Yook yo = new Yook(new Ellipse2D.Double(com_x*30+5, com_y*30+5, 20, 20), co, com_x, com_y);
+							yook.add(yo);
+							count++;
+							if(count == 2)
+								second = false;
+							p_count++;
+							first = false;
+							return;
+					}
+				}
+			}
+		}
+		else {
+			if(checkZero() == 0) {
+				for(int i = 0; i < 19; i++) {
+					for(int j = 0; j < 19; j++) {
+						if(map[i][j] == co) {
+							for(int k = -1; k < 2; k++) {
+								if(i-1>=0 && j+k <19 && j+k >=0)
+									b_map[i-1][j+k] += 1;
+								
+							}for(int k = -1; k < 2; k++) {
+								if(k == 0)
+									continue;
+								if(i>=0 && j+k <19 && j+k >=0)
+									b_map[i][j+k] += 1;
+							}
+							for(int k = -1; k < 2; k++) { 
+								if(j+k <19 && j+k >=0)
+									b_map[i+1][j+k] += 1;
+							}
+						}
+					}
+				}
+			}
+			check_brain();
+			for(int i = 0; i < 19; i++) {
+				for(int j = 0; j < 19; j++) {
+					if(i==0 && j==0) {
+						min = b_map[i][j];
+						min_i = 0;
+						min_j = 0;
+						max = b_map[i][j];
+						max_i = i;
+						max_j = j;
+					}
+					if(min > b_map[i][j]) {
+						if(map[i][j] == 0) {
+							min_i = i;
+							min_j = j;
+							min = b_map[i][j];
+						}
+					}
+					if(max < b_map[i][j]) {
+						if(map[i][j] == 0) {
+							max_i = i;
+							max_j = j;
+							max = b_map[i][j];
+						}
+					}
+				}
+			}
+			if(Math.abs(min) > Math.abs(max)+20) {
+				final_i = min_i;
+				final_j = min_j;
+			}else {
+				final_i = max_i;
+				final_j = max_j;
+			}
+			map[final_i][final_j] = co;
+			for(int k = -1; k < 2; k++) {
+				if(final_i-1>=0 && final_j+k <19 && final_j+k >=0)
+					b_map[final_i-1][final_j+k] += 1;
+				
+			}for(int k = -1; k < 2; k++) {
+				if(k == 0)
+					continue;
+				if(final_i>=0 && final_j+k <19 && final_j+k >=0)
+					b_map[final_i][final_j+k] += 1;
+			}
+			for(int k = -1; k < 2; k++) { 
+				if(final_j+k <19 && final_j+k >=0 && final_i+1 < 19 && final_i+1 >= 0)
+					b_map[final_i+1][final_j+k] += 1;
+			}
+			
+			Yook yo = new Yook(new Ellipse2D.Double(final_i*30+5, final_j*30+5, 20, 20), co, final_i, final_j);
+			yook.add(yo);
+			count++;
+			p_count++;
+			return;
+		}
+			
+	}
+	
+	public int checkZero() {
+		for(int i = 0; i < 19; i++) {
+			for(int j = 0; j < 19; j++) {
+				if(map[i][j] == 0) {
+					if(b_map[i][j] != 0) {
+						return 1;
+					}
+				}
+			}
+		}
+		
+		return 0;
+	}
+	
+	
+	
+	public void check_brain() {
+		int h_count = 0;
+		int ha_count = 0;
+		int sam_count = 0;
+		
+		// ROW
+		for(int i = 0; i < 16; i++) {
+			for(int j = 0; j < 19; j++) {
+				if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1) && map[i+2][j] == (co*-1) && map[i+3][j] == (co*-1)) {
+					if(i > 0 && i+4 < 19) {
+						if(b_map[i-1][j] < -50) {
+							b_map[i-1][j] -= 5;
+						}else {
+							b_map[i-1][j] = -50;
+						}
+						
+						if(b_map[i+4][j] < -50) {
+							b_map[i+4][j] -= 5;
+						}else {
+							b_map[i+4][j] = -50;
+						}
+						
+						if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1) && map[i+2][j] == (co*-1) && map[i+3][j] == (co*-1) && map[i+4][j] == (co*-1)) {
+							if(b_map[i-1][j] < -70) {
+								b_map[i-1][j] -= 10;
+							}else {
+								b_map[i-1][j] = -70;
+							}
+							if(i+5 < 19) {	
+								if(b_map[i+5][j] < -70) {
+									b_map[i+5][j] -= 10;
+								}else {
+									b_map[i+5][j] = -70;
+								}
+							}
+						}
+						
+					}
+				}
+				
+				// JUWON
+				if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1)) {
+					if(i-1 >= 0) {
+						if(map[i-1][j] == 0) {
+							if(i+5 < 19) {
+								if(map[i+2][j] == 0) {
+									if(map[i+3][j] == (co*-1) && map[i+4][j] == (co*-1)) {
+										if(map[i+5][j] == 0) {
+											for(int k = -1; k < 6; k+=3) {
+												if(k+i >= 0 && k+i < 19) {
+													if(map[k+i][j] == 0) {
+														if(b_map[k+i][j] < -50)
+															b_map[k+i][j] -= 5;
+														else
+															b_map[k+i][j] = -50;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				// JUWON2
+				if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1)) {
+					if(i+5 < 19) {
+						if(map[i+2][j] == 0 && map[i+3][j] == 0) {
+							if(map[i+4][j] == (co*-1) && map[i+5][j] == (co*-1)) {
+								if(b_map[i+2][j] < -50)
+									b_map[i+2][j] -= 5;
+								else
+									b_map[i+2][j] = -50;
+							}
+						}
+					}
+				}
+				
+				// HARD (h_count)
+				if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1) && map[i+2][j] == (co*-1)) {
+					sam_count++;
+					if(i-1 >= 0 && i+3 < 19) {
+						if(map[i-1][j] == co && map[i+3][j] == 0) {
+							h_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i+3][j] < -70)
+									b_map[i+3][j] -= 10;
+								else
+									b_map[i+3][j] = -70;
+							}
+						}
+					}
+					if(i+3 < 19 && i-1 >= 0) {
+						if(map[i+3][j] == co && map[i-1][j] == 0) {
+							h_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i-1][j] < -70)
+									b_map[i-1][j] -= 10;
+								else
+									b_map[i-1][j] = -70;
+							}
+						}
+					}
+				}
+				
+				// HARD (ha_count)
+				if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1) && map[i+2][j] == (co*-1)) {
+					if(i+3 < 19 && i-1 >= 0) {
+						if(map[i+3][j] == 0 && map[i-1][j] == 0) {
+							ha_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i+3][j] < -70)
+									b_map[i+3][j] -= 10;
+								else
+									b_map[i+3][j] = -70;
+								
+								if(b_map[i-1][j] < -70)
+									b_map[i-1][j] -= 10;
+								else
+									b_map[i-1][j] = -70;
+							}
+						}
+					}
+				}
+				
+				if(map[i][j] == (co*-1) && map[i+1][j] == (co*-1) && map[i+2][j] == (co*-1)) {
+					if(i+4 < 19) {
+						if(map[i+4][j] == (co*-1)) {
+							if(b_map[i+3][j] < -50) {
+								b_map[i+3][j] -= 5;
+							}else {
+								b_map[i+3][j] = -50;
+							}
+						}
+					}
+					if(i+5 < 19) {
+						if(map[i+5][j] == (co*-1)) {
+							if(b_map[i+3][j] < -50) {
+								b_map[i+3][j] -= 5;
+							}else {
+								b_map[i+3][j] = -50;
+							}
+						}
+					}
+					
+					if(i-2 >= 0) {
+						if(map[i-2][j] == (co*-1)) {
+							if(b_map[i-1][j] < -50) {
+								b_map[i-1][j] -= 5;
+							}else {
+								b_map[i-1][j] = -50;
+							}
+						}
+					}
+					if(i-3 >= 0) {
+						if(map[i-3][j] == (co*-1)) {
+							if(b_map[i-1][j] < -50) {
+								b_map[i-1][j] -= 5;
+							}else {
+								b_map[i-1][j] = -50;
+							}
+						}
+					}
+				}
+				
+				if(map[i][j] == co && map[i+1][j] == co && map[i+2][j] == co && map[i+3][j] == co){
+					if(i > 0) {
+						if(b_map[i-1][j] > 50) {
+							b_map[i-1][j] += 5;
+						}else {
+							b_map[i-1][j] = 50;
+						}
+						if(i+4 < 19) {
+							if(b_map[i+4][j] > 50) {
+								b_map[i+4][j] += 5;
+							}else {
+								b_map[i+4][j] = 50;
+							}
+						}
+						
+						if(i+4 < 19) {
+							if(map[i][j] == co && map[i+1][j] == co && map[i+2][j] == co && map[i+3][j] == co && map[i+4][j] == co) {
+								int value = 70;
+								if(count == 0) {
+									value = 100;
+								}
+								if(i-1 >= 0) {
+									if(b_map[i-1][j] > value) {
+										b_map[i-1][j] += 10;
+									}else {
+										b_map[i-1][j] = value;
+									}
+								}
+								if(i+5 < 19) {
+									if(b_map[i+5][j] > value) {
+										b_map[i+5][j] += 10;
+									}else {
+										b_map[i+5][j] = value;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// COLUMN
+		for(int i = 0; i < 16; i++) {
+			for(int j = 0; j < 19; j++) {
+				if(i+3 < 19) {
+					if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1) && map[j][i+2] == (co*-1) && map[j][i+3] == (co*-1)) {
+						if(i > 0) {
+							if(i-1 >= 0) {
+								if(b_map[j][i-1] < -50) {
+									b_map[j][i-1] -= 5;
+								}else {
+									b_map[j][i-1] = -50;
+								}
+							}
+							if(i+4 < 19) {
+								if(b_map[j][i+4] < -50) {
+									b_map[j][i+4] -= 5;
+								}else {
+									b_map[j][i+4] = -50;
+								}
+							}
+							
+							if(i+4 < 19) {
+								if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1) && map[j][i+2] == (co*-1) && map[j][i+3] == (co*-1) && map[j][i+4] == (co*-1)) {
+									
+									if(i-1 >= 0) {
+										if(b_map[j][i-1] < -70) {
+											b_map[j][i-1] -= 10;
+										}else {
+											b_map[j][i-1] = -70;
+										}
+									}
+									
+									if(i+5 < 19) {
+										if(b_map[j][i+5] < -70) {
+											b_map[j][i+5] -= 10;
+										}else {
+											b_map[j][i+5] = -70;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				// JUWON
+				if(i+1 < 19) {
+					if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1)) {
+						if(i-1 >= 0) {
+							if(map[j][i-1] == 0) {
+								if(i+5 < 19) {
+									if(map[j][i+2] == 0) {
+										if(map[j][i+3] == (co*-1) && map[j][i+4] == (co*-1)) {
+											if(map[j][i+5] == 0) {
+												for(int k = -1; k < 6; k+=3) {
+													if(map[j][k+i] == 0) {
+														if(k+i < 19 && k+i >= 0) {
+															if(b_map[j][k+i] < -50)
+																b_map[j][k+i] -= 5;
+															else
+																b_map[j][k+i] = -50;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				// JUWON2
+				if(i+1 < 19) {
+					if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1)) {
+						if(i+5 < 19) {
+							if(map[j][i+2] == 0 && map[i+3][j] == 0) {
+								if(map[j][i+4] == (co*-1) && map[j][i+5] == (co*-1)) {
+									if(b_map[j][i+2] < -50)
+										b_map[j][i+2] -= 5;
+									else
+										b_map[j][i+2] = -50;
+								}
+							}
+						}
+					}
+				}
+				
+				// HARD (h_count)
+				if(i+2 < 19) {
+					if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1) && map[j][i+2] == (co*-1)) {
+						if(i-1 >= 0 && i+3 < 19) {
+							if(map[j][i-1] == co && map[j][i+3] == 0) {
+								h_count++;
+								if(h_count == 1 && ha_count == 1) {
+									if(b_map[j][i+3] < -70)
+										b_map[j][i+3] -= 10;
+									else
+										b_map[j][i+3] = -70;
+								}
+							}
+						}
+						if(i+3 < 19 && i-1 >= 0) {
+							if(map[j][i+3] == co && map[j][i-1] == 0) {
+								h_count++;
+								if(h_count == 1 && ha_count == 1) {
+									if(b_map[j][i-1] < -70)
+										b_map[j][i-1] -= 10;
+									else
+										b_map[j][i-1] = -70;
+								}
+							}
+						}
+					}
+				}
+				
+				// HARD (ha_count)
+				if(i+2 < 19) {
+					if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1) && map[j][i+2] == (co*-1)) {
+						if(i+3 < 19 && i-1 >= 0) {
+							if(map[j][i+3] == 0 && map[j][i-1] == 0) {
+								ha_count++;
+								if(h_count == 1 && ha_count == 1) {
+									if(b_map[j][i+3] < -70)
+										b_map[j][i+3] -= 10;
+									else
+										b_map[j][i+3] = -70;
+									
+									if(b_map[j][i-1] < -70)
+										b_map[j][i-1] -= 10;
+									else
+										b_map[j][i-1] = -70;
+								}
+							}
+						}
+					}
+				}
+				
+				if(i+2 < 19) {
+					if(map[j][i] == (co*-1) && map[j][i+1] == (co*-1) && map[j][i+2] == (co*-1)) {
+						if(i+4 < 19) {
+							if(map[j][i+4] == (co*-1)) {
+								if(b_map[j][i+3] < -50) {
+									b_map[j][i+3] -= 5;
+								}else {
+									b_map[j][i+3] = -50;
+								}
+							}
+						}
+						if(i+5 < 19) {
+							if(map[j][i+5] == (co*-1)) {
+								if(b_map[j][i+3] < -50) {
+									b_map[j][i+3] -= 5;
+								}else {
+									b_map[j][i+3] = -50;
+								}
+							}
+						}
+						
+						if(i-2 >= 0) {
+							if(map[j][i-2] == (co*-1)) {
+								if(b_map[j][i-1] < -50) {
+									b_map[j][i-1] -= 5;
+								}else {
+									b_map[j][i-1] = -50;
+								}
+							}
+						}
+						if(i-3 >= 0) {
+							if(map[j][i-3] == (co*-1)) {
+								if(b_map[j][i-1] < -50) {
+									b_map[j][i-1] -= 5;
+								}else {
+									b_map[j][i-1] = -50;
+								}
+							}
+						}
+					}
+				}
+				
+				if(i+3 < 19) {
+					if(map[j][i] == co && map[j][i+1] == co && map[j][i+2] == co && map[j][i+3] == co){
+						if(i > 0) {
+							if(i-1 >= 0) {
+								if(b_map[j][i-1] > 50) {
+									b_map[j][i-1] += 5;
+								}else {
+									b_map[j][i-1] = 50;
+								}
+							}
+							
+							if(i+4 < 19) {
+								if(b_map[j][i+4] > 50) {
+									b_map[j][i+4] += 5;
+								}else {
+									b_map[j][i+4] = 50;
+								}
+							}
+							
+							if(i+4 < 19) {
+								if(map[j][i] == co && map[j][i+1] == co && map[j][i+2] == co && map[j][i+3] == co && map[j][i+4] == co) {
+									int value = 70;
+									if(count == 0) {
+										value = 100;
+									}
+									if(i-1 >= 0) {
+										if(b_map[j][i-1] > value) {
+											b_map[j][i-1] += 10;
+										}else {
+											b_map[j][i-1] = value;
+										}
+									}
+									
+									if(i+5 < 19) {
+										if(b_map[j][i+5] > value) {
+											b_map[j][i+5] += 10;
+										}else {
+											b_map[j][i+5] = value;
+										}
+									}
+								}
+							}
+							
+						}
+					}
+				}
+			}
+		}
+		
+		// Dialog_Line
+		for(int i = 0; i < 16; i++) {
+			for(int j = 0; j < 16; j++) {
+				if(map[i][j] == (co*-1) && map[i+1][j+1] == (co*-1) && map[i+2][j+2] == (co*-1) && map[i+3][j+3] == (co*-1)) {
+					if(i > 0 && j > 0) {
+						if(i-1 >= 0 && j-1 >= 0) {
+							if(b_map[i-1][j-1] < -50) {
+								b_map[i-1][j-1] -= 5;
+							}else {
+								b_map[i-1][j-1] = -50;
+							}
+						}
+						
+						if(i+4 < 19 && j+4 < 19) {
+							if(b_map[i+4][j+4] < -50) {
+								b_map[i+4][j+4] -= 5;
+							}else {
+								b_map[i+4][j+4] = -50;
+							}
+						}
+						
+						if(i+4 < 19) {
+							if(map[i][j] == co && map[i+1][j+1] == (co*-1) && map[i+2][j+2] == (co*-1) && map[i+3][j+3] == (co*-1) && map[i+4][j+4] == (co*-1)) {
+								if(i-1 >= 0 && j-1 >= 0) {
+									if(b_map[i-1][j-1] < -70) {
+										b_map[i-1][j-1] -= 10;
+									}else {
+										b_map[i-1][j-1] = -70;
+									}
+								}
+								
+								if(i+5 < 19 && j+5 < 19) {
+									if(b_map[i+5][j+5] < -70) {
+										b_map[i+5][j+5] -= 10;
+									}else {
+										b_map[i+5][j+5] = -70;
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				// JUWON
+				if(map[i][j] == co && map[i+1][j+1] == (co*-1)) {
+					if(i-1 >= 0 && j-1 >= 0) {
+						if(map[i-1][j-1] == 0) {
+							if(map[i+2][j+2] == 0) {
+								if(i+5 < 19 && j+5 < 19) {
+									if(map[i+3][j+3] == (co*-1) && map[i+4][j+4] == (co*-1)) {
+										if(map[i+5][j+5] == 0) {
+											for(int k = -1; k < 6; k+=3) {
+												if(map[k+i][k+j] == 0) {
+													if(k+i < 19 && k+i >= 0 && k+j < 19 && k+j >= 0) {
+														if(b_map[k+i][j+k] < -50)
+															b_map[k+i][j+k] -= 5;
+														else
+															b_map[k+i][j+k] = -50;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				// JUWON2
+				if(map[i][j] == (co*-1) && map[i+1][j+1] == (co*-1)) {
+					if(i+5 < 19 && j+5 < 19) {
+						if(map[i+2][j+2] == 0 && map[i+3][j+3] == 0) {
+							if(map[i+4][j+4] == (co*-1) && map[i+5][j+5] == (co*-1)) {
+								if(b_map[i+2][j+2] < -50)
+									b_map[i+2][j+2] -= 5;
+								else
+									b_map[i+2][j+2] = -50;
+							}
+						}
+					}
+				}
+				
+				// HARD (h_count)
+				if(map[i][j] == co && map[i+1][j+1] == (co*-1) && map[i+2][j+2] == (co*-1)) {
+					if(i-1 >= 0 && j-1 >= 0 && i+3 < 19 && j+3 < 19) {
+						if(map[i-1][j-1] == co && map[i+3][j+3] == 0) {
+							h_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i+3][j+3] < -70)
+									b_map[i+3][j+3] -= 10;
+								else
+									b_map[i+3][j+3] = -70;
+							}
+						}
+					}
+					if(i+3 < 19 && j+3 < 19 && i-1 >= 0 && j-1 >= 0) {
+						if(map[i+3][j+3] == co && map[i-1][j-1] == 0) {
+							h_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i-1][j-1] < -70)
+									b_map[i-1][j-1] -= 10;
+								else
+									b_map[i-1][j-1] = -70;
+							}
+						}
+					}
+				}
+				
+				// HARD (ha_count)
+				if(map[i][j] == co && map[i+1][j+1] == (co*-1) && map[i+2][j+2] == (co*-1)) {
+					if(i+3 < 19 && j+3 < 19 && i-1 >= 0 && j-1 >= 0) {
+						if(map[i+3][j+3] == 0 && map[i-1][j-1] == 0) {
+							ha_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i+3][j+3] < -70)
+									b_map[i+3][j+3] -= 10;
+								else
+									b_map[i+3][j+3] = -70;
+								
+								if(b_map[i-1][j-1] < -70)
+									b_map[i-1][j-1] -= 10;
+								else
+									b_map[i-1][j-1] = -70;
+							}
+						}
+					}
+				}
+				
+				if(map[i][j] == (co*-1) && map[i+1][j+1] == (co*-1) && map[i+2][j+2] == (co*-1)) {
+					if(i+4 < 19 && j+4 < 19) {
+						if(map[i+4][j+4] == (co*-1)) {
+							if(b_map[i+3][j+3] < -50) {
+								b_map[i+3][j+3] -= 5;
+							}else {
+								b_map[i+3][j+3] = -50;
+							}
+						}
+					}
+					if(i+5 < 19 && j+5 < 19) {
+						if(map[i+5][j+5] == (co*-1)) {
+							if(b_map[i+3][j+3] < -50) {
+								b_map[i+3][j+3] -= 5;
+							}else {
+								b_map[i+3][j+3] = -50;
+							}
+						}
+					}
+					
+					if(i-2 >= 0 && j-2 >= 0) {
+						if(map[i-2][j-2] == (co*-1)) {
+							if(b_map[i-1][j-1] < -50) {
+								b_map[i-1][j-1] -= 5;
+							}else {
+								b_map[i-1][j-1] = -50;
+							}
+						}
+					}
+					if(i-3 >= 0 && j-3 >= 0) {
+						if(map[i-3][j-3] == (co*-1)) {
+							if(b_map[i-1][j-1] < -50) {
+								b_map[i-1][j-1] -= 5;
+							}else {
+								b_map[i-1][j-1] = -50;
+							}
+						}
+					}
+				}
+				if(map[i][j] == co && map[i+1][j+1] == co && map[i+2][j+2] == co && map[i+3][j+3] == co){
+					if(i > 0 && j > 0) {
+						if(b_map[i-1][j-1] > 50) {
+							b_map[i-1][j-1] += 5;
+						}else {
+							b_map[i-1][j-1] = 50;
+						}
+						
+						if(b_map[i+4][j+4] > 50) {
+							b_map[i+4][j+4] += 5;
+						}else {
+							b_map[i+4][j+4] = 50;
+						}
+						
+						if(map[i][j] == co && map[i+1][j+1] == co && map[i+2][j+2] == co && map[i+3][j+3] == co && map[i+4][j+4] == co) {
+							int value = 70;
+							if(count == 0) {
+								value = 100;
+							}
+							if(b_map[i-1][j-1] > value) {
+								b_map[i-1][j-1] += 10;
+							}else {
+								b_map[i-1][j-1] = value;
+							}
+							
+							if(b_map[i+5][j+5] > value) {
+								b_map[i+5][j+5] += 10;
+							}else {
+								b_map[i+5][j+5] = value;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// Dialog_Line2
+		for(int i = 0; i < 16; i++) {
+			for(int j = 18; j > 6; j--) {
+				if(map[i][j] == (co*-1) && map[i+1][j-1] == (co*-1) && map[i+2][j-2] == (co*-1) && map[i+3][j-3] == (co*-1)) {
+					if(i > 0 && j+1 < 18) {
+						if(b_map[i-1][j+1] < -50) {
+							b_map[i-1][j+1] -= 5;
+						}else {
+							b_map[i-1][j+1] = -50;
+						}
+						
+						if(b_map[i+4][j-4] < -50) {
+							b_map[i+4][j-4] -= 5;
+						}else {
+							b_map[i+4][j-4] = -50;
+						}
+						
+						
+						if(map[i][j] == (co*-1) && map[i+1][j-1] == (co*-1) && map[i+2][j-2] == (co*-1) && map[i+3][j-3] == (co*-1) && map[i+4][j-4] == (co*-1)) {
+							if(b_map[i-1][j+1] < -70) {
+								b_map[i-1][j+1] -= 10;
+							}else {
+								b_map[i-1][j+1] = -70;
+							}
+							
+							if(b_map[i+5][j-5] < -70) {
+								b_map[i+5][j-5] -= 10;
+							}else {
+								b_map[i+5][j-5] = -70;
+							}
+						}
+					}
+				}
+				
+				// JUWON
+				if(map[i][j] == co && map[i+1][j-1] == (co*-1)) {
+					if(i-1 >= 0 && j+1 < 19) {
+						if(map[i-1][j+1] == 0) {
+							if(map[i+2][j-2] == 0) {
+								if(i+5 < 19 && j-5 >= 0) {
+									if(map[i+3][j-3] == (co*-1) && map[i+4][j-4] == (co*-1)) {
+										if(map[i+5][j-5] == 0) {
+											for(int k = -1; k < 6; k+=3) {
+												if(map[k+i][j-k] == 0) {
+													if(b_map[k+i][j-k] < -50)
+														b_map[k+i][j-k] -= 5;
+													else
+														b_map[k+i][j-k] = -50;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				// JUWON2
+				if(map[i][j] == (co*-1) && map[i+1][j-1] == (co*-1)) {
+					if(i+5 < 19 && j-5 >= 0) {
+						if(map[i+2][j-2] == 0 && map[i+3][j-3] == 0) {
+							if(map[i+4][j-4] == (co*-1) && map[i+5][j-5] == (co*-1)) {
+								if(b_map[i+2][j-2] < -50)
+									b_map[i+2][j-2] -= 5;
+								else
+									b_map[i+2][j-2] = -50;
+							}
+						}
+					}
+				}
+				
+				// HARD (h_count)
+				if(map[i][j] == (co*-1) && map[i+1][j-1] == (co*-1) && map[i+2][j-2] == (co*-1)) {
+					if(i-1 >= 0 && j+1 < 19 && i+3 < 19 && j-3 >= 0) {
+						if(map[i-1][j+1] == co && map[i+3][j-3] == 0) {
+							h_count++;
+							if(h_count == 1 && ha_count == 2) {
+								if(b_map[i+3][j-3] < -70)
+									b_map[i+3][j-3] -= 10;
+								else
+									b_map[i+3][j-3] = -70;
+							}
+						}
+					}
+					if(i+3 < 19 && j-3 >= 0 && i-1 >= 0 && j+1 < 19) {
+						if(map[i+3][j-3] == co && map[i-1][j+1] == 0) {
+							h_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i-1][j+1] < -70)
+									b_map[i-1][j+1] -= 10;
+								else
+									b_map[i-1][j+1] = -70;
+							}
+						}
+					}
+				}
+				
+				// HARD (ha_count)
+				if(map[i][j] == (co*-1) && map[i+1][j-1] == (co*-1) && map[i+2][j-2] == (co*-1)) {
+					if(i-1 >= 0 && j+1 < 19 && i+3 < 19 && j-3 >= 0) {
+						if(map[i-1][j+1] == 0 && map[i+3][j-3] == 0) {
+							ha_count++;
+							if(h_count == 1 && ha_count == 1) {
+								if(b_map[i+3][j-3] < -70)
+									b_map[i+3][j-3] -= 10;
+								else
+									b_map[i+3][j-3] = -70;
+								
+								if(b_map[i-1][j+1] < -70)
+									b_map[i-1][j+1] -= 10;
+								else
+									b_map[i-1][j+1] = -70;
+							}
+						}
+					}
+				}
+				
+				if(map[i][j] == (co*-1) && map[i+1][j-1] == (co*-1) && map[i+2][j-2] == (co*-1)) {
+					if(i+4 < 19 && j-4 >= 0) {
+						if(map[i+4][j-4] == (co*-1)) {
+							if(b_map[i+3][j-3] < -50) {
+								b_map[i+3][j-3] -= 5;
+							}else {
+								b_map[i+3][j-3] = -50;
+							}
+						}
+					}
+					if(i+5 < 19 && j-5 >= 0) {
+						if(map[i+5][j-5] == (co*-1)) {
+							if(b_map[i+3][j-3] < -50) {
+								b_map[i+3][j-3] -= 5;
+							}else {
+								b_map[i+3][j-3] = -50;
+							}
+						}
+					}
+					
+					if(i-2 >= 0 && j+2 < 19) {
+						if(map[i-2][j+2] == (co*-1)) {
+							if(b_map[i-1][j+1] < -50) {
+								b_map[i-1][j+1] -= 5;
+							}else {
+								b_map[i-1][j+1] = -50;
+							}
+						}
+					}
+					if(i-3 >= 0 && j+3 < 19) {
+						if(map[i-3][j+3] == (co*-1)) {
+							if(b_map[i-1][j+1] < -50) {
+								b_map[i-1][j+1] -= 5;
+							}else {
+								b_map[i-1][j+1] = -50;
+							}
+						}
+					}
+				}
+				if(map[i][j] == co && map[i+1][j-1] == co && map[i+2][j-2] == co && map[i+3][j-3] == co){
+					if(i > 0 && j+1 < 18) {
+						if(b_map[i-1][j+1] > 50) {
+							b_map[i-1][j+1] += 5;
+						}else {
+							b_map[i-1][j+1] = 50;
+						}
+							
+						if(b_map[i+4][j-4] > 50) {
+							b_map[i+4][j-4] += 5;
+						}else {
+							b_map[i+4][j-4] = 50;
+						}
+						
+						if(map[i][j] == co && map[i+1][j-1] == co && map[i+2][j-2] == co && map[i+3][j-3] == co && map[i+4][j-4] == co) {
+							int value = 70;
+							if(count == 0) {
+								value = 100;
+							}
+							if(b_map[i-1][j+1] > value) {
+								b_map[i-1][j+1] += 10;
+							}else {
+								b_map[i-1][j+1] = value;
+							}
+							
+							if(b_map[i+5][j-5] > value) {
+								b_map[i+5][j-5] += 10;
+							}else {
+								b_map[i+5][j-5] = value;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	public void check() {
 		if(yook != null) {
 			if(murugi_1 == 1 && player == 1) {
 				if(m_1 == 2) {
-					JOptionPane.showMessageDialog(null, "무르기 2번을 모두 사용하셨습니다.");
+					JOptionPane.showMessageDialog(null, "무르기 2번을 모두 사용하셨습니다.", "경고", JOptionPane.WARNING_MESSAGE);
+				}else if(count == 0) {
+					JOptionPane.showMessageDialog(null, "이전 돌은 무르기가 불가능합니다.", "경고", JOptionPane.WARNING_MESSAGE);
 				}
 				else {
-					if(black == 1 && m_1 < 2) {
-						int i;
-						for(i = yook.size()-1; i >= 0; i--) {
-							if(yook.get(i).color == -1) {
-								map[yook.get(i).x][yook.get(i).y] = 0;
-								yook.remove(i);
-								m_1++;
-								break;
-							}
-						}
-						if(i < 0) {
-							JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.");
-						}
-					}else {
-						int i;
-						for(i = yook.size()-1; i >= 0; i--) {
-							if(yook.get(i).color == 1) {
-								if(yook.get(i).x != 9 && yook.get(i).y != 9) {
-									map[yook.get(i).x][yook.get(i).y] = 0;
-									yook.remove(i);
-									m_1++;
-									break;
+					int result = JOptionPane.showConfirmDialog(null, "CHEOLSU님의 무르기 신청을 수락하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
+					if(result == JOptionPane.YES_OPTION) {
+							if(black == 1 && m_1 < 2) {
+								int i;
+								for(i = yook.size()-1; i >= 0; i--) {
+									if(yook.get(i).color == -1) {
+										map[yook.get(i).x][yook.get(i).y] = 0;
+										yook.remove(i);
+										m_1++;
+										if(count > 0) {
+											count--;
+											p_count--;
+										}
+										break;
+									}
+								}
+								if(i < 0) {
+									JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.", "경고", JOptionPane.WARNING_MESSAGE);
+								}
+						
+						}else {
+							int i;
+							for(i = yook.size()-1; i >= 0; i--) {
+								if(yook.get(i).color == 1) {
+									if(yook.get(i).x != 9 && yook.get(i).y != 9) {
+										map[yook.get(i).x][yook.get(i).y] = 0;
+										yook.remove(i);
+										m_1++;
+										if(count > 0) {
+											count--;
+											p_count--;
+										}
+										break;
+									}
 								}
 							}
-						}
-						if(i < 0) {
-							JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.");
+							if(i < 0) {
+								JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.", "경고", JOptionPane.WARNING_MESSAGE);
+							}
 						}
 					}
 				}
@@ -373,35 +1476,48 @@ public class Frame extends JFrame{
 			
 			else if(murugi_2 == 1 && player == -1) {
 				if(m_2 == 2) {
-					JOptionPane.showMessageDialog(null, "무르기 2번을 모두 사용하셨습니다.");
+					JOptionPane.showMessageDialog(null, "무르기 2번을 모두 사용하셨습니다.", "경고", JOptionPane.WARNING_MESSAGE);
+				}else if(count == 2) {
+					JOptionPane.showMessageDialog(null, "이전 돌은 무르기가 불가능합니다.", "경고", JOptionPane.WARNING_MESSAGE);
 				}
 				else {
-					if(black == 1 && m_2 < 2) {
-						int i;
-						for(i = yook.size()-1; i >= 0; i--) {
-							if(yook.get(i).color == 1) {
-								if(yook.get(i).x != 9 && yook.get(i).y != 9) {
+					int result = JOptionPane.showConfirmDialog(null, "JANGGU님의 무르기 신청을 수락하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
+					if(result == JOptionPane.YES_OPTION) {
+						if(black == 1 && m_2 < 2) {
+								int i;
+								for(i = yook.size()-1; i >= 0; i--) {
+									if(yook.get(i).color == 1) {
+										if(yook.get(i).x != 9 && yook.get(i).y != 9) {
+											map[yook.get(i).x][yook.get(i).y] = 0;
+											yook.remove(i);
+											m_2++;
+											if(count > 0) {
+												count--;
+												p_count--;
+											}
+											break;
+										}
+									}
+								}
+								if(i < 0)
+									JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.", "경고", JOptionPane.WARNING_MESSAGE);
+						}else {
+							int i;
+							for(i = yook.size()-1; i >= 0; i--) {
+								if(yook.get(i).color == -1) {
 									map[yook.get(i).x][yook.get(i).y] = 0;
 									yook.remove(i);
 									m_2++;
+									if(count > 0) {
+										count--;
+										p_count--;
+									}
 									break;
 								}
 							}
+							if(i < 0)
+								JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.", "경고", JOptionPane.WARNING_MESSAGE);
 						}
-						if(i < 0)
-							JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.");
-					}else {
-						int i;
-						for(i = yook.size()-1; i >= 0; i--) {
-							if(yook.get(i).color == -1) {
-								map[yook.get(i).x][yook.get(i).y] = 0;
-								yook.remove(i);
-								m_2++;
-								break;
-							}
-						}
-						if(i < 0)
-							JOptionPane.showMessageDialog(null, "더 이상 무를 수 있는 돌이 없습니다.");
 					}
 				}
 			}
@@ -417,8 +1533,6 @@ public class Frame extends JFrame{
 		}else if(who == 0) {
 			JOptionPane.showMessageDialog(null, "게임 끝!");
 		}
-		
-		
 		repaint();
 		restart();
 	}
@@ -428,12 +1542,12 @@ public class Frame extends JFrame{
 		public void mousePressed(MouseEvent e) {
 			
 			if(start_n == 0 && player == 0) {
-				JOptionPane.showMessageDialog(null, "시작버튼을 눌러주십시오.");
+				JOptionPane.showMessageDialog(null, "시작버튼을 눌러주십시오.", "경고", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 			
 			if(re == 1 && start_n == 0) {
-				JOptionPane.showMessageDialog(null, "시작버튼을 눌러주십시오.");
+				JOptionPane.showMessageDialog(null, "시작버튼을 눌러주십시오.", "경고", JOptionPane.WARNING_MESSAGE);
 				return;
 			}
 			int x = e.getX();
@@ -444,9 +1558,9 @@ public class Frame extends JFrame{
 				count = 0;
 				p_count = 0;
 			}
+			
 			if(p_count == 1) {
 				player *= -1;
-				
 			}
 			
 			int yo_x = 0, yo_y = 0;
@@ -455,17 +1569,33 @@ public class Frame extends JFrame{
 				yo_y = y/30;
 				
 				if(map[yo_x][yo_y] == 0) {
-					if(co == 1)
-						map[yo_x][yo_y] = 1;
-					else
-						map[yo_x][yo_y] = -1;
+					map[yo_x][yo_y] = co;
+					
+					for(int k = -1; k < 2; k++) {
+						if(yo_x-1>=0 && yo_y+k <19 && yo_y+k>=0)
+							b_map[yo_x-1][yo_y+k] -= 1;
+						
+					}for(int k = -1; k < 2; k++) {
+						if(k == 0)
+							continue;
+						if(yo_x>=0 && yo_y+k <19 && yo_y+k>=0)
+							b_map[yo_x][yo_y+k] -= 1;
+					}
+					for(int k = -1; k < 2; k++) { 
+						if(yo_y+k <19 && yo_y+k>=0)
+							b_map[yo_x+1][yo_y+k] -= 1;
+					}
 					
 					Yook yo = new Yook(new Ellipse2D.Double(yo_x*30+5, yo_y*30+5, 20, 20), co, yo_x, yo_y);
 					yook.add(yo);
 					count++;
 					p_count++;
 				}else {
-					JOptionPane.showMessageDialog(null, "같은 곳에 둘 수 없습니다.");
+					JOptionPane.showMessageDialog(null, "같은 곳에 둘 수 없습니다.", "경고", JOptionPane.WARNING_MESSAGE);
+					int p = p_count - 1;
+					if(p == 0) {
+						player *= -1;
+					}
 				}
 				
 			}
@@ -478,6 +1608,16 @@ public class Frame extends JFrame{
 			Diagonal_Line();
 			Diagonal_Line2();
 			All();
+		}
+		
+		public void mouseReleased(MouseEvent e) {
+			if(brain) {
+				b_count++;
+				if(b_count == 2) {
+					callBrain();
+					b_count = 0;
+				}
+			}
 		}
 	}
 	
@@ -596,8 +1736,8 @@ public class Frame extends JFrame{
 	}
 	
 	public void Column() {
-		for(int i = 0; i < 19; i++) {
-			for(int j = 0; j < 14; j++) {
+		for(int i = 0; i < 14; i++) {
+			for(int j = 0; j < 19; j++) {
 				if(map[j][i] == 1 && map[j][i+1] == 1 && map[j][i+2] == 1 && map[j][i+3] == 1 && map[j][i+4] == 1 && map[j][i+5] == 1) {
 					Win(1);
 				}
